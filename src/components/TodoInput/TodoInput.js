@@ -26,6 +26,9 @@ class TodoInput extends Component {
     return (
       <form onSubmit={this.onSubmit} action="">
         <input onChange={this.onChange} type="text" value={input} />
+        <button className="btn btn-info" type="submit">
+          Add
+        </button>
       </form>
     );
   }

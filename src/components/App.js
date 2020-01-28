@@ -3,10 +3,11 @@ import TodoList from "./TodoList/TodoList";
 import TodoInput from "./TodoInput/TodoInput";
 import TodoButtonsGroup from "./TodoButtonsGroup/TodoButtonsGroup";
 import AppHeaderCount from "./AppHeaderCount/AppHeaderCount";
+import SearchInput from "./SearchInput/SearchInput";
 import shortid from "shortid";
 
 export default class App extends Component {
-  state = { items: [] };
+  state = { items: [], term: "", filter: "all" };
 
   addTodoItem = text => {
     const { items } = this.state;
@@ -20,6 +21,7 @@ export default class App extends Component {
     this.setState({
       items: [...items, item]
     });
+    console.log(items);
   };
 
   handleDelete = id => {
@@ -48,21 +50,59 @@ export default class App extends Component {
     }));
   };
 
+  // Search !!!
+  onSearchChange = term => {
+    this.setState({ term });
+  };
+
+  search = (items, term) => {
+    if (term.length === 0) {
+      return items;
+    }
+
+    return items.filter(i => i.text.indexOf(term) > -1);
+  };
+
+  // Filter !!!
+  filter = (items, filter) => {
+    switch (filter) {
+      case "all":
+        return items;
+      case "done":
+        return items.filter(i => i.done);
+      case "active":
+        return items.filter(i => !i.done);
+      default:
+        return items;
+    }
+  };
+
+  onFilterChange = filter => {
+    this.setState({ filter });
+  };
+
   render() {
-    const { items } = this.state;
+    const { items, term, filter } = this.state;
+
     const doneCount = items.filter(el => el.done).length;
     const todoCount = items.length - doneCount;
+
+    const visibleItems = this.filter(this.search(items, term), filter);
 
     return (
       <div>
         <AppHeaderCount toDo={todoCount} done={doneCount} />
-        <TodoButtonsGroup />
+        <SearchInput onSearchChange={this.onSearchChange} />
+        <TodoButtonsGroup
+          onFilterChange={this.onFilterChange}
+          filter={filter}
+        />
         <TodoInput addText={this.addTodoItem} />
         <TodoList
           onToggleImportant={this.onToggleImportant}
           onToggleDone={this.onToggleDone}
           handleDelete={this.handleDelete}
-          items={items}
+          items={visibleItems}
         />
       </div>
     );
